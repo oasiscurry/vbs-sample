@@ -1,916 +1,1035 @@
-' ==============================================================================
-' スクリプト名：common.vbi
-' 作成者      ：shingo.yoshioka
-' 作成日      ：2019年03月02日(土)
-' 更新日      ：2019年03月11日(月)
-' 概要        ：vbs用共通関数
-' ==============================================================================
-' 関数一覧
-' GetRegistry(regkey)：レジストリの値を取得
-' SetRegistry(regkey, regvalue, regtype)：レジストリに値を設定
-' GetClipBoardText()：クリップボードの文字列を取得
-' GetFolder(target_folder)：フォルダ名を取得
-' GetSubFolder(target_folder)：サブフォルダ一覧を取得する
-' CopyFile(from_file, to_file)：ファイルをコピーする
-' RenameFile(before_file_name, after_file_name)：ファイル名を変更する
-' RenameFolder(before_folder_name, after_folder_name)：フォルダ名を変更する
-' GetFileName(file_name)：ファイル名(絶対パス)からファイル名(拡張子なし)を取得
-' GetFileNameExt(file_name)：ファイル名(絶対パス)からファイル名(拡張子付き)を取得
-' GetFileExt(file_name)：ファイル名から拡張子を取得
-' GetFilePath(file_name)：ファイルパスを取得
-' GetDateFormat(format)：日付取得関数
-' WriteFile(file_name, mode, str)：ファイルに書込む
-' ReadFile(file_name)：テキストファイルを読取る
-' ReadExcelFile(file_name, sheet_name)：Excelファイルを読取る
-' CheckFile(path)：ファイルの存在確認
-' CheckFolder(path)：フォルダの存在確認
-' CreateFolder(path)：フォルダを作成する
-' DeleteFolder(path)：フォルダを削除する
-' MoveFolder(before_folder_name, after_folder_name)：フォルダを移動する
-' StrMatch(strbuf, strptn)：文字列を検索し、一致、不一致を返す
-' StrMatchSub(strbuf, strptn)：検索する文字列に一致する文字列を取得
-' StrMatchRep(strbuf, strptn, strrep)：文字列の置換を行う
-' ==============================================================================
+' * ****************************************************************************
+' * vbs用共通関数のファイル
+' *
+' * @package   Vbs\Common
+' * @author    shingo.yoshioka / https://www.sighon-system.jp
+' * @copyright 2020 shingo.yoshioka
+' * @license   http://opensource.org/licenses/mit-license.php MIT License
+' * ****************************************************************************
+
+' * ****************************************************************************
+' * 関数一覧
+' * GetRegistry：レジストリ値取得
+' * SetRegistry：レジストリ値設定
+' * GetClipBoardText：クリップボードの文字列取得
+' * GetFolder：フォルダ名取得
+' * GetSubFolder：サブフォルダ一覧取得
+' * CopyFile：ファイルコピー
+' * RenameFile：ファイル名変更
+' * RenameFolder：フォルダ名変更
+' * GetFileName：ファイル名(拡張子なし)取得
+' * GetFileNameExt：ファイル名(拡張子付き)取得
+' * GetFileExt：ファイル名から拡張子取得
+' * GetFilePath：ファイルパス取得
+' * GetFolderName：フォルダ名取得
+' * GetFolderObj：フォルダオブジェクト取得
+' * GetDateFormat：日付取得
+' * WriteFile：ファイル書込
+' * WriteFileList：ファイルリスト出力
+' * ReadFile：テキストファイル読取
+' * ReadExcelFile：Excelファイル読取
+' * CheckFile：ファイル存在確認
+' * CheckFolder：フォルダ存在確認
+' * CreateFolder：フォルダ作成
+' * DeleteFolder：フォルダ削除
+' * MoveFolder：フォルダ移動
+' * MoveTrash：ごみ箱へ移動
+' * StrMatch：検索文字列の一致、不一致を返す
+' * StrMatchSub：検索文字列に一致する文字列を取得
+' * StrMatchRep：文字列置換
+' * ****************************************************************************
 Option Explicit
 
-' ======================================
-' 関数名：GetRegistry
-' 引数  ：レジストリキー
-' 戻り値：レジストリの値(なければFalse)
-' 作成者：shingo.yoshioka
-' 作成日：2019年03月05日(火)
-' 更新日：2019年03月05日(火)
-' 概要  ：レジストリの値を取得
-' ======================================
-Function GetRegistry(regkey)
-	' 変数定義
-	Dim objShell
-	Dim ret
 
-	' シェルオブジェクト作成。
-	Set objShell = CreateObject("WScript.Shell")
+' * ****************************************************************************
+' * レジストリ値取得
+' *
+' * @param ByVal regkey 取得するレジストリ値のレジストリキー
+' *
+' * @return Registry Value レジストリ値(存在しなければfalseを返す)
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function GetRegistry(ByVal regkey)
+    ' 変数定義
+    Dim objShell
+    Dim ret
 
-	' レジストリの読込と存在確認
-	On Error Resume Next
-		ret = objShell.RegRead(regkey)
+    ' シェルオブジェクト作成
+    Set objShell = CreateObject("WScript.Shell")
 
-		If Err.Number = -2147024894 Then
-			' レジストリがない
-			ret = False
-		ElseIf Err.Number = 0 Then
-			' レジストリがある
-		End If
-		Err.Clear
-	On Error Goto 0
+    ' レジストリの読込と存在確認
+    On Error Resume Next
+        ret = objShell.RegRead(regkey)
 
-	' オブジェクトの解放
-	Set objShell = Nothing
+        If Err.Number = -2147024894 Then
+            ' レジストリがない
+            ret = false
+        ElseIf Err.Number = 0 Then
+            ' レジストリがある
+        End If
+        Err.Clear
+    On Error Goto 0
 
-	' レジストリの値を返す
-	GetRegistry = ret
+    ' オブジェクトの解放
+    Set objShell = Nothing
+
+    ' レジストリの値を返す
+    GetRegistry = ret
 End Function
 
 
-' ======================================
-' 関数名：SetRegistry
-' 引数  ：レジストリキー
-'         レジストリの値
-'         レジストリの型
-' 戻り値：なし
-' 作成者：shingo.yoshioka
-' 作成日：2019年03月05日(火)
-' 更新日：2019年03月05日(火)
-' 概要  ：レジストリに値を設定
-' ======================================
-Function SetRegistry(regkey, regvalue, regtype)
-	' 変数定義
-	Dim objShell
-	Dim ret
+' * ****************************************************************************
+' * レジストリ値設定
+' *
+' * @param ByVal regkey 設定するレジストリ値のレジストリキー
+' * @param ByVal regvalue 設定するレジストリ値
+' * @param ByVal regtype 設定するレジストリ値の型
+' *  (REG_BINARY、REG_SZ、REG_EXPAND_SZ、REG_MULTI_SZ、REG_DWORD、REG_QWORD)
+' *
+' * @return void
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function SetRegistry(ByVal regkey, ByVal regvalue, ByVal regtype)
+    ' 変数定義
+    Dim objShell
+    Dim ret
 
-	' シェルオブジェクト作成。
-	Set objShell = CreateObject("WScript.Shell")
+    ' シェルオブジェクト作成
+    Set objShell = CreateObject("WScript.Shell")
 
-	' レジストリに値を設定
-	ret = objShell.RegWrite(regkey, regvalue, regtype)
+    ' レジストリに値を設定
+    ret = objShell.RegWrite(regkey, regvalue, regtype)
 
-	' オブジェクトの解放
-	Set objShell = Nothing
+    ' オブジェクトの解放
+    Set objShell = Nothing
 End Function
 
 
-' ======================================
-' 関数名：GetClipBoardText
-' 引数  ：なし
-' 戻り値：クリップボードの文字列
-' 作成者：shingo.yoshioka
-' 作成日：2019年02月27日(水)
-' 更新日：2019年02月27日(水)
-' 概要  ：クリップボードの文字列を取得
-' ======================================
+' * ****************************************************************************
+' * クリップボードの文字列取得
+' *
+' * @return String クリップボードの文字列
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
 Function GetClipBoardText()
-	' 変数定義
-	Dim objHTML
-	Dim clip
+    ' 変数定義
+    Dim objHTML
+    Dim clip
 
-	' HTMLオブジェクト作成
-	Set objHTML = CreateObject("htmlfile")
+    ' HTMLオブジェクト作成
+    Set objHTML = CreateObject("htmlfile")
 
-	' クリップボードの文字列を取得
-	clip = Trim(objHTML.ParentWindow.ClipboardData.GetData("text"))
+    ' クリップボードの文字列を取得
+    clip = Trim(objHTML.ParentWindow.ClipboardData.GetData("text"))
 
-	' オブジェクトの解放
-	Set objHTML = Nothing
+    ' オブジェクトの解放
+    Set objHTML = Nothing
 
-	' クリップボードの文字列を返す
-	GetClipBoardText = clip
+    ' クリップボードの文字列を返す
+    GetClipBoardText = clip
 End Function
 
 
-' ======================================
-' 関数名：GetFolder
-' 引数  ：対象フォルダ名(絶対パス)
-' 戻り値：対象フォルダ名
-' 作成者：shingo.yoshioka
-' 作成日：2019年03月10日(日)
-' 更新日：2019年03月10日(日)
-' 概要  ：フォルダ名を取得
-' ======================================
-Function GetFolder(target_folder)
-	' 変数定義
-	Dim objFSO
-	Dim objFolder
-	Dim strfolder
-	Dim strret
+' * ****************************************************************************
+' * フォルダ名取得
+' *
+' * @param ByVal target_folder 対象フォルダ名(絶対パス)
+' *
+' * @return String 対象フォルダ名
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function GetFolder(ByVal target_folder)
+    ' 変数定義
+    Dim objFSO
+    Dim objFolder
+    Dim strfolder
+    Dim strret
 
-	' ファイルシステムオブジェクト作成
-	Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
+    ' ファイルシステムオブジェクト作成
+    Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
 
-	' フォルダの有無を確認
-	strret = objFSO.FolderExists(target_folder)
+    ' フォルダの有無を確認
+    strret = objFSO.FolderExists(target_folder)
 
-	' フォルダ名格納用
-	strfolder = ""
+    ' フォルダ名格納用
+    strfolder = ""
 
-	' 対象フォルダがあればフォルダ名を取得
-	If strret Then
-		' フォルダオブジェクト作成
-		Set objFolder = objFSO.GetFolder(target_folder)
+    ' 対象フォルダがあればフォルダ名を取得
+    If strret Then
+        ' フォルダオブジェクト作成
+        Set objFolder = objFSO.GetFolder(target_folder)
 
-		' フォルダ名を取得
-		strfolder = objFolder.Name
+        ' フォルダ名を取得
+        strfolder = objFolder.Name
 
-		' オブジェクトの解放
-		Set objFolder = Nothing
-	End If
+        ' オブジェクトの解放
+        Set objFolder = Nothing
+    End If
 
-	' オブジェクトの解放
-	Set objFSO = Nothing
+    ' オブジェクトの解放
+    Set objFSO = Nothing
 
-	' フォルダ名を返す
-	GetFolder = strfolder
+    ' フォルダ名を返す
+    GetFolder = strfolder
 End Function
 
 
-' ======================================
-' 関数名：GetSubFolder
-' 引数  ：対象フォルダ名(絶対パス)
-' 戻り値：対象フォルダのサブフォルダ一覧(ArrayListオブジェクト)
-' 作成者：shingo.yoshioka
-' 作成日：2019年03月09日(土)
-' 更新日：2019年03月09日(土)
-' 概要  ：サブフォルダ一覧を取得する
-' ======================================
-Function GetSubFolder(target_folder)
-	' 変数定義
-	Dim objFSO
-	Dim objFolder
-	Dim objSubFolder
-	Dim aryRet
-	Dim strfolder
-	Dim strret
+' * ****************************************************************************
+' * サブフォルダ一覧取得
+' *
+' * @param ByVal target_folder 対象フォルダ名(絶対パス)
+' *
+' * @return ArrayList 対象フォルダのサブフォルダ一覧
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function GetSubFolder(ByVal target_folder)
+    ' 変数定義
+    Dim objFSO
+    Dim objFolder
+    Dim objSubFolder
+    Dim aryRet
+    Dim strfolder
+    Dim strret
 
-	' ファイルシステムオブジェクト作成
-	Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
+    ' ファイルシステムオブジェクト作成
+    Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
 
-	' フォルダの有無を確認
-	strret = objFSO.FolderExists(target_folder)
+    ' フォルダの有無を確認
+    strret = objFSO.FolderExists(target_folder)
 
-	' サブフォルダ格納用
-	strfolder = ""
+    ' サブフォルダ格納用
+    strfolder = ""
 
-	' 対象フォルダがあればサブフォルダを取得
-	If strret Then
-		' フォルダオブジェクト作成
-		Set objFolder = objFSO.GetFolder(target_folder)
+    ' 対象フォルダがあればサブフォルダを取得
+    If strret Then
+        ' フォルダオブジェクト作成
+        Set objFolder = objFSO.GetFolder(target_folder)
 
-		' サブフォルダ一覧を*区切りで格納
-		For Each objSubFolder in objFolder.SubFolders
-			strfolder = strfolder & objSubFolder.Path & "*"
-		Next
+        ' サブフォルダ一覧を*区切りで格納
+        For Each objSubFolder in objFolder.SubFolders
+            strfolder = strfolder & objSubFolder.Path & "*"
+        Next
 
-		' 末尾の*を削除
-		strfolder = Left(strfolder, Len(strfolder) - 1)
+        If Len(strfolder) > 0 Then
+            ' 末尾の*を削除
+            strfolder = Left(strfolder, Len(strfolder) - 1)
+        End If
 
-		' オブジェクトの解放
-		Set objFolder = Nothing
-	End If
+        ' オブジェクトの解放
+        Set objFolder = Nothing
+    End If
 
-	' フォルダを配列に格納する
-	If Len(strfolder) > 0 Then
-		If InStr(strfolder,"*") > 0 Then
-			aryRet = Split(strfolder,"*")
-		Else
-			aryRet = Array(strfolder)
-		End If
-	Else
-		aryRet = Array("")
-	End If
+    ' フォルダを配列に格納する
+    If Len(strfolder) > 0 Then
+        If InStr(strfolder,"*") > 0 Then
+            aryRet = Split(strfolder,"*")
+        Else
+            aryRet = Array(strfolder)
+        End If
+    Else
+        aryRet = Array("")
+    End If
 
-	' オブジェクトの解放
-	Set objFSO = Nothing
+    ' オブジェクトの解放
+    Set objFSO = Nothing
 
-	' サブフォルダ一覧を返す
-	GetSubFolder = aryRet
+    ' サブフォルダ一覧を返す
+    GetSubFolder = aryRet
 End Function
 
 
-' ======================================
-' 関数名：CopyFile
-' 引数  ：コピーするファイル名(絶対パス)
-'         コピー先ファイル名(絶対パス)
-' 戻り値：なし
-' 作成者：shingo.yoshioka
-' 作成日：2019年03月09日(土)
-' 更新日：2019年03月09日(土)
-' 概要  ：ファイルをコピーする
-' ======================================
-Function CopyFile(from_file, to_file)
-	' 変数定義
-	Dim objFSO
-	Dim strret
+' * ****************************************************************************
+' * ファイルコピー
+' *
+' * @param ByVal from_file コピーするファイル名(絶対パス)
+' * @param ByVal to_file コピー先ファイル名(絶対パス)
+' *
+' * @return void
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function CopyFile(ByVal from_file, ByVal to_file)
+    ' 変数定義
+    Dim objFSO
+    Dim strret
 
-	' ファイルシステムオブジェクト作成
-	Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
+    ' ファイルシステムオブジェクト作成
+    Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
 
-	' ファイルの有無を確認
-	strret = objFSO.FileExists(from_file)
+    ' ファイルの有無を確認
+    strret = objFSO.FileExists(from_file)
 
-	' ファイルがあればファイルをコピーする
-	If strret Then
-		' ファイルをコピー
-		strret = objFSO.CopyFile(from_file, to_file)
-	End If
+    ' ファイルがあればファイルをコピー
+    If strret Then
+        ' ファイルをコピー
+        strret = objFSO.CopyFile(from_file, to_file)
+    End If
 
-	' オブジェクトの解放
-	Set objFSO = Nothing
+    ' オブジェクトの解放
+    Set objFSO = Nothing
 End Function
 
 
-' ======================================
-' 関数名：RenameFile
-' 引数  ：変更するファイル名(絶対パス)
-'         変更後ファイル名(パスなし)
-' 戻り値：なし
-' 作成者：shingo.yoshioka
-' 作成日：2019年02月27日(水)
-' 更新日：2019年02月27日(水)
-' 概要  ：ファイル名を変更する
-' ======================================
-Function RenameFile(before_file_name, after_file_name)
-	' 変数定義
-	Dim objFSO
-	Dim objFile
-	Dim strret
+' * ****************************************************************************
+' * ファイル名変更
+' *
+' * @param ByVal before_file_name 変更するファイル名(絶対パス)
+' * @param ByVal after_file_name 変更後ファイル名(パスなし)
+' *
+' * @return void
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function RenameFile(ByVal before_file_name, ByVal after_file_name)
+    ' 変数定義
+    Dim objFSO
+    Dim objFile
+    Dim strret
 
-	' ファイルシステムオブジェクト作成
-	Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
+    ' ファイルシステムオブジェクト作成
+    Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
 
-	' ファイルの有無を確認
-	strret = objFSO.FileExists(before_file_name)
+    ' ファイルの有無を確認
+    strret = objFSO.FileExists(before_file_name)
 
-	' ファイルがあればファイル名を変更
-	If strret Then
-		' ファイル名変更
-		Set objFile = objFSO.GetFile(before_file_name)
-		objFile.Name = after_file_name
+    ' ファイルがあればファイル名を変更
+    If strret Then
+        ' ファイル名変更
+        Set objFile = objFSO.GetFile(before_file_name)
+        objFile.Name = after_file_name
 
-		' オブジェクトの解放
-		Set objFile = Nothing
-	End If
+        ' オブジェクトの解放
+        Set objFile = Nothing
+    End If
 
-	' オブジェクトの解放
-	Set objFSO = Nothing
+    ' オブジェクトの解放
+    Set objFSO = Nothing
 End Function
 
 
-' ======================================
-' 関数名：RenameFolder
-' 引数  ：変更するフォルダ名(絶対パス)
-'         変更後フォルダ名(パスなし)
-' 戻り値：なし
-' 作成者：shingo.yoshioka
-' 作成日：2019年03月09日(土)
-' 更新日：2019年03月09日(土)
-' 概要  ：フォルダ名を変更する
-' ======================================
-Function RenameFolder(before_folder_name, after_folder_name)
-	' 変数定義
-	Dim objFSO
-	Dim objFolder
-	Dim strret
+' * ****************************************************************************
+' * フォルダ名変更
+' *
+' * @param ByVal before_folder_name 変更するフォルダ名(絶対パス)
+' * @param ByVal after_folder_name 変更後フォルダ名(パスなし)
+' *
+' * @return void
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function RenameFolder(ByVal before_folder_name, ByVal after_folder_name)
+    ' 変数定義
+    Dim objFSO
+    Dim objFolder
+    Dim strret
 
-	' ファイルシステムオブジェクト作成
-	Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
+    ' ファイルシステムオブジェクト作成
+    Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
 
-	' フォルダの有無を確認
-	strret = objFSO.FolderExists(before_folder_name)
+    ' フォルダの有無を確認
+    strret = objFSO.FolderExists(before_folder_name)
 
-	' フォルダがあればフォルダ名を変更
-	If strret Then
-		' フォルダ名変更
-		Set objFolder = objFSO.GetFolder(before_folder_name)
-		objFolder.Name = after_folder_name
+    ' フォルダがあればフォルダ名を変更
+    If strret Then
+        ' フォルダ名変更
+        Set objFolder = objFSO.GetFolder(before_folder_name)
+        objFolder.Name = after_folder_name
 
-		' オブジェクトの解放
-		Set objFolder = Nothing
-	End If
+        ' オブジェクトの解放
+        Set objFolder = Nothing
+    End If
 
-	' オブジェクトの解放
-	Set objFSO = Nothing
+    ' オブジェクトの解放
+    Set objFSO = Nothing
 End Function
 
 
-' ======================================
-' 関数名：GetFileName
-' 引数  ：ファイル名(絶対パス)
-' 戻り値：ファイル名(拡張子なし)
-' 作成者：shingo.yoshioka
-' 作成日：2019年02月27日(水)
-' 更新日：2019年03月02日(土)
-' 概要  ：ファイル名(絶対パス)からファイル名(拡張子なし)を取得
-' ======================================
-Function GetFileName(file_name)
-	' 変数定義
-	Dim objFSO
-	Dim strret
+' * ****************************************************************************
+' * ファイル名(拡張子なし)取得
+' *
+' * @param ByVal file_name ファイル名(絶対パス)
+' *
+' * @return String ファイル名(拡張子なし)
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function GetFileName(ByVal file_name)
+    ' 変数定義
+    Dim objFSO
+    Dim strret
 
-	' ファイルシステムオブジェクト作成
-	Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
+    ' ファイルシステムオブジェクト作成
+    Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
 
-	' ファイルの有無を確認
-	strret = objFSO.FileExists(file_name)
+    ' ファイルの有無を確認
+    strret = objFSO.FileExists(file_name)
 
-	' ファイルがあればファイル名を取得
-	If strret Then
-		' ファイル名取得
-		strret = objFSO.GetBaseName(file_name)
-	End If
+    ' ファイルがあればファイル名を取得
+    If strret Then
+        ' ファイル名取得
+        strret = objFSO.GetBaseName(file_name)
+    End If
 
-	' オブジェクトの解放
-	Set objFSO = Nothing
+    ' オブジェクトの解放
+    Set objFSO = Nothing
 
-	' 結果ファイル名を返す
-	GetFileName = strret
+    ' 結果ファイル名を返す
+    GetFileName = strret
 End Function
 
 
-' ======================================
-' 関数名：GetFileNameExt
-' 引数  ：ファイル名(絶対パス)
-' 戻り値：ファイル名(拡張子付き)
-' 作成者：shingo.yoshioka
-' 作成日：2019年03月02日(土)
-' 更新日：2019年03月02日(土)
-' 概要  ：ファイル名(絶対パス)からファイル名(拡張子付き)を取得
-' ======================================
-Function GetFileNameExt(file_name)
-	' 変数定義
-	Dim objFSO
-	Dim objFile
-	Dim strret
+' * ****************************************************************************
+' * ファイル名(拡張子付き)取得
+' *
+' * @param ByVal file_name ファイル名(絶対パス)
+' *
+' * @return String ファイル名(拡張子付き)
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function GetFileNameExt(ByVal file_name)
+    ' 変数定義
+    Dim objFSO
+    Dim objFile
+    Dim strret
 
-	' ファイルシステムオブジェクト作成
-	Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
+    ' ファイルシステムオブジェクト作成
+    Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
 
-	' ファイルの有無を確認
-	strret = objFSO.FileExists(file_name)
+    ' ファイルの有無を確認
+    strret = objFSO.FileExists(file_name)
 
-	' ファイルがあればファイル名を取得
-	If strret Then
-		' ファイル名取得
-		Set objFile = objFSO.GetFile(file_name)
-		strret = objFile.Name
+    ' ファイルがあればファイル名を取得
+    If strret Then
+        ' ファイル名取得
+        Set objFile = objFSO.GetFile(file_name)
+        strret = objFile.Name
 
-		' オブジェクトの解放
-		Set objFile = Nothing
-	End If
+        ' オブジェクトの解放
+        Set objFile = Nothing
+    End If
 
-	' オブジェクトの解放
-	Set objFSO = Nothing
+    ' オブジェクトの解放
+    Set objFSO = Nothing
 
-	' 結果ファイル名を返す
-	GetFileNameExt = strret
+    ' 結果ファイル名を返す
+    GetFileNameExt = strret
 End Function
 
 
-' ======================================
-' 関数名：GetFileExt
-' 引数  ：ファイル名(絶対パス)
-' 戻り値：拡張子
-' 作成者：shingo.yoshioka
-' 作成日：2019年03月02日(土)
-' 更新日：2019年03月02日(土)
-' 概要  ：ファイル名から拡張子を取得
-' ======================================
-Function GetFileExt(file_name)
-	' 変数定義
-	Dim objFSO
-	Dim strret
+' * ****************************************************************************
+' * ファイル名から拡張子取得
+' *
+' * @param ByVal file_name ファイル名(絶対パス)
+' *
+' * @return String 拡張子
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function GetFileExt(ByVal file_name)
+    ' 変数定義
+    Dim objFSO
+    Dim strret
 
-	' ファイルシステムオブジェクト作成
-	Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
+    ' ファイルシステムオブジェクト作成
+    Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
 
-	' ファイルの有無を確認
-	strret = objFSO.FileExists(file_name)
+    ' ファイルの有無を確認
+    strret = objFSO.FileExists(file_name)
 
-	' ファイルがあれば拡張子を取得
-	If strret Then
-		' 拡張子取得
-		strret = objFSO.GetExtensionName(file_name)
-	End If
+    ' ファイルがあれば拡張子を取得
+    If strret Then
+        ' 拡張子取得
+        strret = objFSO.GetExtensionName(file_name)
+    End If
 
-	' オブジェクトの解放
-	Set objFSO = Nothing
+    ' オブジェクトの解放
+    Set objFSO = Nothing
 
-	' 結果ファイル名を返す
-	GetFileExt = strret
+    ' 結果ファイル名を返す
+    GetFileExt = strret
 End Function
 
 
-' ======================================
-' 関数名：GetFilePath
-' 引数  ：ファイル名(絶対パス)
-' 戻り値：ファイルパス
-' 作成者：shingo.yoshioka
-' 作成日：2019年02月27日(水)
-' 更新日：2014年02月27日(水)
-' 概要  ：ファイルパスを取得
-' ======================================
-Function GetFilePath(file_name)
-	' 変数定義
-	Dim objFSO
-	Dim objFile
-	Dim strret
+' * ****************************************************************************
+' * ファイルパス取得
+' *
+' * @param ByVal file_name ファイル名(絶対パス)
+' *
+' * @return String ファイルパス
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function GetFilePath(ByVal file_name)
+    ' 変数定義
+    Dim objFSO
+    Dim objFile
+    Dim strret
 
-	' ファイルシステムオブジェクト作成
-	Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
+    ' ファイルシステムオブジェクト作成
+    Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
 
-	' ファイルの有無を確認
-	strret = objFSO.FileExists(file_name)
+    ' ファイルの有無を確認
+    strret = objFSO.FileExists(file_name)
 
-	' ファイルがあればファイルパスを取得
-	If strret Then
-		Set objFile = objFSO.GetFile(file_name)
-		strret = objFile.ParentFolder
+    ' ファイルがあればファイルパスを取得
+    If strret Then
+        Set objFile = objFSO.GetFile(file_name)
+        strret = objFile.ParentFolder
 
-		' オブジェクトの解放
-		Set objFile = Nothing
-	End If
+        ' オブジェクトの解放
+        Set objFile = Nothing
+    End If
 
-	' オブジェクトの解放
-	Set objFSO = Nothing
+    ' オブジェクトの解放
+    Set objFSO = Nothing
 
-	' 結果ファイルパスを返す
-	GetFilePath = strret
+    ' 結果ファイルパスを返す
+    GetFilePath = strret
 End Function
 
 
-' ======================================
-' 関数名：GetDateFormat
-' 引数  ：YYYYMMDDHHSSの書式指定を行う
-' 戻り値：書式指定した値
-' 作成者：shingo.yoshioka
-' 作成日：2014年12月19日(金)
-' 更新日：2014年12月19日(金)
-' 概要  ：日付取得関数
-' ======================================
-Function GetDateFormat(format)
-	' 変数定義
-	Dim wkdate
+' * ****************************************************************************
+' * フォルダ名取得
+' *
+' * @param ByVal file_name ファイル名(絶対パス)
+' *
+' * @return String フォルダ名を取得
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function GetFolderName(ByVal folder_name)
+    ' 変数定義
+    Dim objFSO
+    Dim objFile
+    Dim ret
 
-	' 書式を書式指定用ワーク領域にコピー
-	wkdate = format
+    ' ファイルシステムオブジェクト作成
+    Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
 
-	' 書式指定処理
-	wkdate = Replace(wkdate, "YYYY",Year(Now))
-	wkdate = Replace(wkdate, "YY",Right(Year(Now), 2))
-	wkdate = Replace(wkdate, "MM",Right("0" & Month(Now), 2))
-	wkdate = Replace(wkdate, "DD",Right("0" & Day(Now), 2))
-	wkdate = Replace(wkdate, "HH",Right("0" & Hour(Now), 2))
-	wkdate = Replace(wkdate, "mm",Right("0" & Minute(Now), 2))
-	wkdate = Replace(wkdate, "SS",Right("0" & Second(Now), 2))
+    ' フォルダの有無を確認
+    ret = objFSO.FolderExists(folder_name)
 
-	' 書式指定した値を返す
-	GetDateFormat = wkdate
+    ' フォルダがあればファイルパスを取得
+    If ret Then
+        ret = objFSO.GetFolder(folder_name).Name
+
+        ' オブジェクトの解放
+        Set objFile = Nothing
+    End If
+
+    ' オブジェクトの解放
+    Set objFSO = Nothing
+
+    ' 結果ファイルパスを返す
+    GetFolderName = ret
 End Function
 
 
-' ======================================
-' 関数名：WriteFile
-' 引数  ：ファイル名(絶対パス)
-'         モード(1：読取り専用　2：上書きモード　8：追記モード)
-'         書込む文字列
-' 戻り値：なし
-' 作成者：shingo.yoshioka
-' 作成日：2014年12月19日(金)
-' 更新日：2019年03月11日(月)
-' 概要  ：ファイルに書込む
-' ======================================
-Function WriteFile(file_name, mode, str)
-	' 変数定義
-	Dim objFSO
-	Dim objFile
-	Dim strret
+' * ****************************************************************************
+' * フォルダオブジェクト取得
+' *
+' * @param ByVal file_name フォルダ名(絶対パス)
+' *
+' * @return Folder フォルダオブジェクト
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function GetFolderObj(ByVal folder_name)
+    ' 変数定義
+    Dim objFSO
+    Dim ret
 
-	' ファイルシステムオブジェクト作成
-	Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
+    ' ファイルシステムオブジェクト作成
+    Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
 
-	'ファイルが存在しなければ作成
-	If objFSO.FileExists(file_name) = false Then
-		' 作成とファイルオープン
-		Set objFile = objFSO.CreateTextFile(file_name, mode)
-	Else
-		' ファイルオープン
-		Set objFile = objFSO.OpenTextFile(file_name, mode)
-	End If
+    ' フォルダの有無を確認
+    ret = objFSO.FolderExists(folder_name)
 
-	' ファイル書込み
-	strret = objFile.WriteLine(str)
+    ' フォルダがあればフォルダオブジェクトを取得
+    If ret Then
+        ' フォルダオブジェクトを返す
+        Set GetFolderObj = objFSO.GetFolder(folder_name)
+    Else
+        Set GetFolderObj = Nothing
+    End If
 
-	' ファイルクローズ
-	objFile.Close
-
-	' オブジェクトの解放
-	Set objFile = Nothing
-	Set objFSO = Nothing
+    ' オブジェクトの解放
+    Set objFSO = Nothing
 End Function
 
 
-' ======================================
-' 関数名：ReadFile
-' 引数  ：ファイル名(絶対パス)
-' 戻り値：行単位の配列
-' 作成者：shingo.yoshioka
-' 作成日：2014年12月19日(金)
-' 更新日：2014年12月19日(金)
-' 概要  ：テキストファイルを読取る
-' ======================================
-Function ReadFile(file_name)
-	' 変数定義
-	Dim objFSO
-	Dim objFile
-	Dim strText
+' * ****************************************************************************
+' * 日付取得
+' *
+' * @param ByVal format YYYYMMDDHHSSの書式指定を行う
+' *
+' * @return String 指定した書式の現在日時
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function GetDateFormat(ByVal format)
+    ' 変数定義
+    Dim wkdate
 
-	' ファイルシステムオブジェクト作成
-	Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
+    ' 書式を書式指定用ワーク領域にコピー
+    wkdate = format
 
- 	' ファイルを開く
-	Set objFile = objFSO.OpenTextFile(file_name, 1)
+    ' 書式指定処理
+    wkdate = Replace(wkdate, "YYYY",Year(Now))
+    wkdate = Replace(wkdate, "YY",Right(Year(Now), 2))
+    wkdate = Replace(wkdate, "MM",Right("0" & Month(Now), 2))
+    wkdate = Replace(wkdate, "DD",Right("0" & Day(Now), 2))
+    wkdate = Replace(wkdate, "HH",Right("0" & Hour(Now), 2))
+    wkdate = Replace(wkdate, "mm",Right("0" & Minute(Now), 2))
+    wkdate = Replace(wkdate, "SS",Right("0" & Second(Now), 2))
 
-	' テキストファイル読み取り
-	strText = objFile.ReadAll()
-
-	' ファイルクローズ
-	objFile.Close
-
-	' オブジェクトの解放
-	Set objFile = Nothing
-	Set objFSO = Nothing
-
-	' 行単位に配列にして返す
-	ReadFile = Split(strText, vbCrLf)
+    ' 書式指定した値を返す
+    GetDateFormat = wkdate
 End Function
 
 
-' ======================================
-' 関数名：ReadExcelFile
-' 引数  ：ファイル名
-'         シート名
-' 戻り値：行単位の配列(列は@@区切り)
-' 作成者：shingo.yoshioka
-' 作成日：2015年12月18日(金)
-' 更新日：2015年12月18日(金)
-' 概要  ：Excelファイルを読取る
-' ======================================
-Function ReadExcelFile(file_name, sheet_name)
-	' 変数定義
-	Dim objADO
-	Dim objRS
-	Dim readcmd
-	Dim strret
-	Dim sql
-	Dim i
-	Dim buf
+' * ****************************************************************************
+' * ファイル書込
+' *
+' * @param ByVal file_name 対象のファイル
+' * @param ByVal mode モード(1：読取り専用　2：上書きモード　8：追記モード)
+' * @param ByVal str 書込む文字列
+' *
+' * @return void
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function WriteFile(ByVal file_name, ByVal mode, ByVal str)
+    ' 変数定義
+    Dim objFSO
+    Dim objFile
+    Dim strret
 
-	' ADOオブジェクトを作成します
-	Set objADO = CreateObject("ADODB.Connection")
+    ' ファイルシステムオブジェクト作成
+    Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
 
-	' ADOを使いエクセルワークブックを読み込みモードでオープンします
-	readcmd = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" & file_name & ";" & "Extended Properties=""Excel 12.0 Xml;HDR=NO;IMEX=1"""
-	strret = objADO.Open(readcmd)
+    'ファイルが存在しなければ作成
+    If objFSO.FileExists(file_name) = false Then
+        ' 作成とファイルオープン
+        Set objFile = objFSO.CreateTextFile(file_name, mode)
+    Else
+        ' ファイルオープン
+        Set objFile = objFSO.OpenTextFile(file_name, mode)
+    End If
 
-	' SQLを実行
-	sql = "select * from [" & sheet_name & "$]"
-	Set objRS = objADO.Execute(sql)
+    ' ファイル書込み
+    strret = objFile.WriteLine(str)
 
-	' SQLの実行結果を格納
-	Do While not objRS.EOF 
-		For i = 0 to objRS.Fields.Count - 1
-			If i <> 0 Then 
-				buf = buf & "@@"
-			End If
-			buf = buf & objRS.Fields(i).Value
-		Next
-		buf = buf & vbCrLf
-		objRS.MoveNext
-	Loop
+    ' ファイルクローズ
+    objFile.Close
 
-	' オブジェクトクローズ
-	objRS.Close
-	objADO.Close
-
-	' オブジェクトの解放
-	Set objADO = Nothing
-
-	' 1行単位配列で返す
-	ReadExcelFile = Split(buf, vbCrLf)
+    ' オブジェクトの解放
+    Set objFile = Nothing
+    Set objFSO = Nothing
 End Function
 
 
-' ======================================
-' 関数名：CheckFile
-' 引数  ：ファイル(絶対パス)
-' 戻り値：true(あり)、false(なし)
-' 作成者：shingo.yoshioka
-' 作成日：2014年12月03日(水)
-' 更新日：2014年12月03日(水)
-' 概要  ：ファイルの存在確認
-' ======================================
-Function CheckFile(path)
-	' 変数定義
-	Dim objFSO
+' * ****************************************************************************
+' * ファイルリスト出力
+' *
+' * @param ByVal objFolder 対象フォルダのフォルダオブジェクト
+' * @param ByVal file_name ファイルリスト出力ファイル名(絶対パス)
+' *
+' * @return void
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function WriteFileList(ByVal objFolder, ByVal file_name)
+    Dim objSubFolder
+    Dim objFile
+    Dim ret
 
-	' ファイルシステムオブジェクト作成
-	Set objFSO = CreateObject("Scripting.FileSystemObject")
+    ' フォルダがあれば再帰
+    For Each objSubFolder In objFolder.SubFolders
+        ret = WriteFileList(objSubFolder, file_name)
+    Next
 
-	' ファイルの存在確認
-	If objFSO.FileExists(path) Then
-		' ファイルが存在する
-		CheckFile= true
-	Else
-		' ファイルが存在しない
-		CheckFile= false
-	End If
+    ' ファイルリストを出力
+    For Each objFile In objFolder.Files
+        ret = WriteFile(file_name, 8, objFile.ParentFolder & "\" & objFile.Name)
+    Next
 
-	' オブジェクトの解放
-	Set objFSO = Nothing
+    ' オブジェクトの解放
+    Set objFile = Nothing
+    Set objSubFolder = Nothing
 End Function
 
 
-' ======================================
-' 関数名：CheckFolder
-' 引数  ：フォルダ(絶対パス)
-' 戻り値：true(あり)、false(なし)
-' 作成者：shingo.yoshioka
-' 作成日：2014年12月04日(木)
-' 更新日：2014年12月04日(木)
-' 概要  ：フォルダの存在確認
-' ======================================
-Function CheckFolder(path)
-	' 変数定義
-	Dim objFSO
+' * ****************************************************************************
+' * テキストファイル読取
+' *
+' * @param ByVal file_name 読取る対象ファイル名(絶対パス)
+' * @param ByVal file_name ファイルリスト出力ファイル名(絶対パス)
+' *
+' * @return Array 行単位の文字列配列
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function ReadFile(ByVal file_name)
+    ' 変数定義
+    Dim objFSO
+    Dim objFile
+    Dim strText
 
-	' ファイルシステムオブジェクト作成
-	Set objFSO = CreateObject("Scripting.FileSystemObject")
+    ' ファイルシステムオブジェクト作成
+    Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
 
-	' フォルダの存在確認
-	If objFSO.FolderExists(path) Then
-		' フォルダが存在する
-		CheckFolder = true
-	Else
-		' フォルダが存在しない
-		CheckFolder = false
-	End If
+     ' ファイルを開く
+    Set objFile = objFSO.OpenTextFile(file_name, 1)
 
-	' オブジェクトの解放
-	Set objFSO = Nothing
+    ' テキストファイル読み取り
+    strText = objFile.ReadAll()
+
+    ' ファイルクローズ
+    objFile.Close
+
+    ' オブジェクトの解放
+    Set objFile = Nothing
+    Set objFSO = Nothing
+
+    ' 行単位に配列にして返す
+    ReadFile = Split(strText, vbCrLf)
 End Function
 
 
-' ======================================
-' 関数名：CreateFolder
-' 引数  ：フォルダ(絶対パス)
-' 戻り値：なし
-' 作成者：shingo.yoshioka
-' 作成日：2014年12月04日(木)
-' 更新日：2014年12月04日(木)
-' 概要  ：フォルダを作成する
-' ======================================
-Function CreateFolder(path)
-	' 変数定義
-	Dim objFSO
-	Dim strret
+' * ****************************************************************************
+' * Excelファイル読取
+' *
+' * @param ByVal file_name  読取る対象ファイル名(絶対パス)
+' * @param ByVal sheet_name 読取る対象シート名
+' *
+' * @return Array 行単位の文字列配列(列は@@区切り)
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function ReadExcelFile(ByVal file_name, ByVal sheet_name)
+    ' 変数定義
+    Dim objADO
+    Dim objRS
+    Dim readcmd
+    Dim strret
+    Dim sql
+    Dim i
+    Dim buf
 
-	' ファイルシステムオブジェクト作成
-	Set objFSO = CreateObject("Scripting.FileSystemObject")
+    ' ADOオブジェクトを作成
+    Set objADO = CreateObject("ADODB.Connection")
 
-	' フォルダを作成
-	strret = objFSO.CreateFolder(path)
+    ' ワークブックを読み込みモードでオープン
+    readcmd = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" & file_name & ";" & "Extended Properties=""Excel 12.0 Xml;HDR=NO;IMEX=1"""
+    strret = objADO.Open(readcmd)
 
-	' オブジェクトの解放
-	Set objFSO = Nothing
+    ' SQLを実行
+    sql = "select * from [" & sheet_name & "$]"
+    Set objRS = objADO.Execute(sql)
+
+    ' SQLの実行結果を格納
+    Do While not objRS.EOF 
+        For i = 0 to objRS.Fields.Count - 1
+            If i <> 0 Then 
+                buf = buf & "@@"
+            End If
+            buf = buf & objRS.Fields(i).Value
+        Next
+        buf = buf & vbCrLf
+        objRS.MoveNext
+    Loop
+
+    ' オブジェクトクローズ
+    objRS.Close
+    objADO.Close
+
+    ' オブジェクトの解放
+    Set objADO = Nothing
+
+    ' 行単位配列で返す
+    ReadExcelFile = Split(buf, vbCrLf)
 End Function
 
 
-' ======================================
-' 関数名：DeleteFolder
-' 引数  ：フォルダ(絶対パス)
-' 戻り値：なし
-' 作成者：shingo.yoshioka
-' 作成日：2014年12月19日(金)
-' 更新日：2014年12月19日(金)
-' 概要  ：フォルダを削除する
-' ======================================
-Function DeleteFolder(path)
-	' 変数定義
-	Dim objFSO
-	Dim strret
+' * ****************************************************************************
+' * ファイル存在確認
+' *
+' * @param ByVal path 対象ファイル名(絶対パス)
+' *
+' * @return Bool 存在する:true 存在しない:false
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function CheckFile(ByVal path)
+    ' 変数定義
+    Dim objFSO
 
-	' ファイルシステムオブジェクト作成
-	Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
+    ' ファイルシステムオブジェクト作成
+    Set objFSO = CreateObject("Scripting.FileSystemObject")
 
-	' フォルダの削除
-	' Trueを指定すると読取専用でも削除する
-	strret = objFSO.DeleteFolder(path, True)
+    ' ファイルの存在確認
+    If objFSO.FileExists(path) Then
+        ' ファイルが存在する
+        CheckFile= true
+    Else
+        ' ファイルが存在しない
+        CheckFile= false
+    End If
 
-	' オブジェクトの解放
-	Set objFSO = Nothing
+    ' オブジェクトの解放
+    Set objFSO = Nothing
 End Function
 
 
-' ======================================
-' 関数名：MoveFolder
-' 引数  ：移動するフォルダ名(絶対パス)
-'         移動先フォルダ名(絶対パス)
-' 戻り値：なし
-' 作成者：shingo.yoshioka
-' 作成日：2019年03月09日(土)
-' 更新日：2019年03月09日(土)
-' 概要  ：フォルダを移動する
-' ======================================
-Function MoveFolder(before_folder_name, after_folder_name)
-	' 変数定義
-	Dim objFSO
-	Dim strret
+' * ****************************************************************************
+' * フォルダ存在確認
+' *
+' * @param ByVal path 対象フォルダ名(絶対パス)
+' *
+' * @return Bool 存在する:true 存在しない:false
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function CheckFolder(ByVal path)
+    ' 変数定義
+    Dim objFSO
 
-	' ファイルシステムオブジェクト作成
-	Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
+    ' ファイルシステムオブジェクト作成
+    Set objFSO = CreateObject("Scripting.FileSystemObject")
 
-	' 移動元フォルダの有無を確認
-	strret = objFSO.FolderExists(before_folder_name)
+    ' フォルダの存在確認
+    If objFSO.FolderExists(path) Then
+        ' フォルダが存在する
+        CheckFolder = true
+    Else
+        ' フォルダが存在しない
+        CheckFolder = false
+    End If
 
-	' 移動元と移動先フォルダがあれば移動
-	If strret Then
-		' 移動先フォルダの有無を確認
-		strret = objFSO.FolderExists(after_folder_name)
-
-		If strret Then
-			' フォルダ移動
-			strret = objFSO.MoveFolder(before_folder_name, after_folder_name)
-		End If
-	End If
-
-	' オブジェクトの解放
-	Set objFSO = Nothing
+    ' オブジェクトの解放
+    Set objFSO = Nothing
 End Function
 
 
-' ======================================
-' 関数名：StrMatch
-' 引数  ：検索元の文字列
-'         検索文字列
-' 戻り値：true(一致)、false(不一致)
-' 作成者：shingo.yoshioka
-' 作成日：2014年12月03日(水)
-' 更新日：2014年12月03日(水)
-' 概要  ：文字列を検索し、一致、不一致を返す
-' ======================================
-Function StrMatch(strbuf, strptn)
-	' 変数定義
-	Dim objRe
-	Dim strbool
+' * ****************************************************************************
+' * フォルダ作成
+' *
+' * @param ByVal path 対象フォルダ名(絶対パス)
+' *
+' * @return void
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function CreateFolder(ByVal path)
+    ' 変数定義
+    Dim objFSO
+    Dim strret
 
-	' 正規表現オブジェクト作成
-	Set objRe = new RegExp
+    ' ファイルシステムオブジェクト作成
+    Set objFSO = CreateObject("Scripting.FileSystemObject")
 
-	' 検索パラメータの設定
-	objRe.IgnoreCase = False			' 大文字小文字を区別する(大文字と小文字を区別する場合はFalseを指定)
-	objRe.pattern = strptn				' 検索する文字列
+    ' フォルダを作成
+    strret = objFSO.CreateFolder(path)
 
-	' 文字列の検索
-	strbool = objRe.Test(strbuf)
-
-	' オブジェクトの解放
-	Set objRe = Nothing
-
-	' 一致、不一致を返す
-	StrMatch =strbool
+    ' オブジェクトの解放
+    Set objFSO = Nothing
 End Function
 
 
-' ======================================
-' 関数名：StrMatchSub
-' 引数  ：検索を行う文字列
-'         検索する文字列(正規表現)
-' 戻り値：検索して一致した文字列、一致しない場合はfalse
-' 作成者：shingo.yoshioka
-' 作成日：2019年02月27日(水)
-' 更新日：2019年02月27日(水)
-' 概要  ：検索する文字列に一致する文字列を取得
-' ======================================
-Function StrMatchSub(strbuf, strptn)
-	' 変数定義
-	Dim objRe
-	Dim objMatch
-	Dim objMatches
-	Dim strret
+' * ****************************************************************************
+' * フォルダ削除
+' *
+' * @param ByVal path 対象フォルダ名(絶対パス)
+' *
+' * @return void
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function DeleteFolder(ByVal path)
+    ' 変数定義
+    Dim objFSO
+    Dim strret
 
-	' 正規表現オブジェクト作成
-	Set objRe = new RegExp
+    ' ファイルシステムオブジェクト作成
+    Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
 
-	' 検索パラメータの設定
-	objRe.IgnoreCase = False			' 大文字小文字を区別する(大文字と小文字を区別する場合はFalseを指定)
-	objRe.pattern = strptn				' 検索する文字列
-	objRe.Global = True					' 文字列全体を検索
+    ' フォルダの削除
+    ' Trueを指定すると読取専用でも削除する
+    strret = objFSO.DeleteFolder(path, True)
 
-	' 検索を実施
-	Set objMatches = objRe.Execute(strbuf)
-
-	' 検索結果を取得
-	For Each objMatch in objMatches				' Matches コレクションに対して繰り返し処理を行います。
-		strret = strret & objMatch.Value
-	Next
-
-	' オブジェクトの開放
-	Set objMatch = Nothing
-	Set objMatches = Nothing
-	Set objRe = Nothing
-
-	' 取得した文字列を返す
-	StrMatchSub = strret
+    ' オブジェクトの解放
+    Set objFSO = Nothing
 End Function
 
 
-' ======================================
-' 関数名：StrMatchRep
-' 引数  ：String 置換を行う文字列
-'                パターン
-'                置換文字
-' 戻り値：置換後の文字列
-' 作成者：shingo.yoshioka
-' 作成日：2019年02月27日(水)
-' 更新日：2019年02月27日(水)
-' 概要  ：文字列の置換を行う
-' ======================================
-Function StrMatchRep(strbuf, strptn, strrep)
-	' 変数定義
-	Dim objRe
-	Dim strret
+' * ****************************************************************************
+' * フォルダ移動
+' *
+' * @param ByVal before_folder_name 移動するフォルダ名(絶対パス)
+' * @param ByVal after_folder_name 移動先フォルダ名(絶対パス)
+' *
+' * @return void
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function MoveFolder(ByVal before_folder_name, ByVal after_folder_name)
+    ' 変数定義
+    Dim objFSO
+    Dim strret
 
-	' 正規表現オブジェクト作成
-	Set objRe = new RegExp
+    ' ファイルシステムオブジェクト作成
+    Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
 
-	' 検索パラメータの設定
-	objRe.IgnoreCase = False			' 大文字小文字を区別する(大文字と小文字を区別する場合はFalseを指定)
-	objRe.pattern = strptn				' 検索する文字列
-	objRe.Global = True					' 文字列全体を検索
+    ' 移動元フォルダの有無を確認
+    strret = objFSO.FolderExists(before_folder_name)
 
-	' 置換対象の有無を確認
-	strret = objRe.Test(strbuf)
+    ' 移動元と移動先フォルダがあれば移動
+    If strret Then
+        ' 移動先フォルダの有無を確認
+        strret = objFSO.FolderExists(after_folder_name)
 
-	' 置換対象があれば置換処理を実施
-	If strret Then
-		' 置換処理
-		strret = objRe.Replace(strbuf, strrep)
-	Else
-		strret = strbuf
-	End If
+        If strret Then
+            ' フォルダ移動
+            strret = objFSO.MoveFolder(before_folder_name, after_folder_name & "\")
+        End If
+    End If
 
-	' オブジェクトの解放
-	Set objRe = Nothing
-
-	' 置換結果を返す
-	StrMatchRep = strret
+    ' オブジェクトの解放
+    Set objFSO = Nothing
 End Function
 
 
+' * ****************************************************************************
+' * ごみ箱へ移動
+' *
+' * @param ByVal folder_or_file フォルダ名またはファイル名(絶対パス)
+' *
+' * @return void
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function MoveTrash(ByVal folder_or_file)
+    ' 変数定義
+    Dim objShell
+    Dim objFSO
+    Dim TrashKFID
+
+    ' ゴミ箱の定数10をセット(KNOWN FOLDER ID)
+    TrashKFID = 10
+
+    ' シェルオブジェクト作成
+    Set objShell = WScript.CreateObject("Shell.Application")
+
+    ' ファイルシステムオブジェクト作成
+    Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
+
+    ' ごみ箱へ移動
+    objShell.NameSpace(TrashKFID).MoveHere(folder_or_file)
+
+    ' ごみ箱へ移動完了待ち
+    While objFSO.FileExists(folder_or_file)
+        WScript.Sleep(100)
+    Wend
+
+    ' オブジェクトの解放
+    Set objFSO = Nothing
+    Set objShell = Nothing
+End Function
+
+
+' * ****************************************************************************
+' * 検索文字列の一致、不一致を返す
+' *
+' * @param ByVal strbuf 検索元の文字列
+' * @param ByVal strptn 検索文字列
+' *
+' * @return Bool 一致:true 不一致:false
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function StrMatch(ByVal strbuf, ByVal strptn)
+    ' 変数定義
+    Dim objRe
+    Dim strbool
+
+    ' 正規表現オブジェクト作成
+    Set objRe = new RegExp
+
+    ' 検索パラメータの設定
+    objRe.IgnoreCase = False ' 大文字小文字を区別する(区別しない場合はTrueを指定)
+    objRe.pattern = strptn ' 検索する文字列
+
+    ' 文字列の検索
+    strbool = objRe.Test(strbuf)
+
+    ' オブジェクトの解放
+    Set objRe = Nothing
+
+    ' 一致、不一致を返す
+    StrMatch =strbool
+End Function
+
+
+' * ****************************************************************************
+' * 検索文字列に一致する文字列を取得
+' *
+' * @param ByVal strbuf 検索元の文字列
+' * @param ByVal strptn 検索文字列
+' *
+' * @return String 検索に一致した文字列、一致しない場合はfalse
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function StrMatchSub(ByVal strbuf, ByVal strptn)
+    ' 変数定義
+    Dim objRe
+    Dim objMatch
+    Dim objMatches
+    Dim strret
+
+    ' 正規表現オブジェクト作成
+    Set objRe = new RegExp
+
+    ' 検索パラメータの設定
+    objRe.IgnoreCase = False ' 大文字小文字を区別する(区別しない場合はTrueを指定)
+    objRe.pattern = strptn ' 検索する文字列
+    objRe.Global = True ' 文字列全体を検索
+
+    ' 検索を実施
+    Set objMatches = objRe.Execute(strbuf)
+
+    ' 検索結果を取得
+    For Each objMatch in objMatches
+        strret = strret & objMatch.Value
+    Next
+
+    ' オブジェクトの開放
+    Set objMatch = Nothing
+    Set objMatches = Nothing
+    Set objRe = Nothing
+
+    ' 取得した文字列または一致しなかった場合のfalseを返す
+    StrMatchSub = strret
+End Function
+
+
+' * ****************************************************************************
+' * 文字列置換
+' *
+' * @param ByVal strbuf 置換元の文字列
+' * @param ByVal strptn 検索文字列
+' * @param ByVal strrep 置換文字列
+' *
+' * @return String 置換した文字列
+' * @author shingo.yoshioka / https://www.sighon-system.jp
+' * ****************************************************************************
+Function StrMatchRep(ByVal strbuf, ByVal strptn, ByVal strrep)
+    ' 変数定義
+    Dim objRe
+    Dim strret
+
+    ' 正規表現オブジェクト作成
+    Set objRe = new RegExp
+
+    ' 検索パラメータの設定
+    objRe.IgnoreCase = False ' 大文字小文字を区別する(区別しない場合はTrueを指定)
+    objRe.pattern = strptn ' 検索する文字列
+    objRe.Global = True ' 文字列全体を検索
+
+    ' 置換対象の有無を確認
+    strret = objRe.Test(strbuf)
+
+    ' 置換対象があれば置換処理を実施
+    If strret Then
+        ' 置換処理
+        strret = objRe.Replace(strbuf, strrep)
+    Else
+        strret = strbuf
+    End If
+
+    ' オブジェクトの解放
+    Set objRe = Nothing
+
+    ' 置換した文字列を返す
+    StrMatchRep = strret
+End Function
